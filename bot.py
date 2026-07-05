@@ -1,12 +1,15 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-import time
+from flask import Flask, request
 
-TOKEN = "8087794080:AAHTIyjk9Vh9BxPH4ISbpMiiKBhSPuJnMzw"
-bot = telebot.TeleBot(TOKEN)
+# TOKENNI SHU YERGA QO'YING
+TOKEN = "8087794080:AAENIXZIMJNNXIwlUhRdWzKNB_qa3WKGCEs"
+bot = telebot.TeleBot(TOKEN, threaded=False)
 
 IMAGE_URL = "https://i.ibb.co/nW7xfMJ/image.png"
 GAME_URL = "https://t.me/Zombie_war_bot/Zombiewargame"
+
+app = Flask(__name__)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -21,18 +24,19 @@ def send_welcome(message):
     try:
         bot.send_photo(chat_id=message.chat.id, photo=IMAGE_URL, caption=caption_text, reply_markup=markup)
     except Exception as e:
-        print(f"Xatolik: {e}")
+        print(f"Xato: {e}")
 
-# Hugging Face-da ishga tushirish uchun oddiy interfeys
-import gradio as io
+# Vercel xabarlarni qabul qiladigan manzil
+@app.route('/', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return '', 200
+    else:
+        return 'Xato so'rov', 403
 
-def greet():
-    return "Zombie War Bot 24/7 faol holatda!"
-
-# Botni alohida oqimda orqada yuritish
-import threading
-threading.Thread(target=lambda: bot.infinity_polling(), daemon=True).start()
-
-# Asosiy sahifani ishga tushirish (Hugging Face uchun)
-demo = io.Interface(fn=greet, inputs=[], outputs="text", title="Zombie War Bot Status")
-demo.launch(server_name="0.0.0.0", server_port=7860)
+@app.route('/')
+def index():
+    return "Bot Webhook tizimida muvaffaqiyatli ishlamoqda!"
