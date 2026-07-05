@@ -1,8 +1,7 @@
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from flask import Flask, request
 
-# TOKENNI SHU YERGA QO'YING
+# Yangi faol tokening
 TOKEN = "8087794080:AAENIXZIMJNNXIwlUhRdWzKNB_qa3WKGCEs"
 bot = telebot.TeleBot(TOKEN, threaded=False)
 
@@ -13,8 +12,8 @@ app = Flask(__name__)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    markup = InlineKeyboardMarkup()
-    play_button = InlineKeyboardButton(text="🎮 Play", url=GAME_URL)
+    markup = telebot.types.InlineKeyboardMarkup()
+    play_button = telebot.types.InlineKeyboardButton(text="🎮 Play", url=GAME_URL)
     markup.add(play_button)
     
     caption_text = (
@@ -24,9 +23,9 @@ def send_welcome(message):
     try:
         bot.send_photo(chat_id=message.chat.id, photo=IMAGE_URL, caption=caption_text, reply_markup=markup)
     except Exception as e:
-        print(f"Xato: {e}")
+        print(f"Xatolik yuz berdi: {e}")
 
-# Vercel xabarlarni qabul qiladigan manzil
+# Telegram faqat shu post manzilga xabar uradi
 @app.route('/', methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
@@ -35,8 +34,8 @@ def webhook():
         bot.process_new_updates([update])
         return '', 200
     else:
-        return 'Xato so'rov', 403
+        return 'Taqiqlangan', 403
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    return "Bot Webhook tizimida muvaffaqiyatli ishlamoqda!"
+    return "Bot muvaffaqiyatli ishlamoqda!"
