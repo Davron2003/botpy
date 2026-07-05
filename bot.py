@@ -1,7 +1,6 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+import time
 
 TOKEN = "8087794080:AAHTIyjk9Vh9BxPH4ISbpMiiKBhSPuJnMzw"
 bot = telebot.TeleBot(TOKEN)
@@ -24,20 +23,16 @@ def send_welcome(message):
     except Exception as e:
         print(f"Xatolik: {e}")
 
-# Koyeb o'chirib qo'ymasligi uchun soxta veb-server (Port: 8000)
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Bot is alive!")
+# Hugging Face-da ishga tushirish uchun oddiy interfeys
+import gradio as io
 
-def run_server():
-    server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
-    server.serve_forever()
+def greet():
+    return "Zombie War Bot 24/7 faol holatda!"
 
-if __name__ == "__main__":
-    print("Bot va Server ishga tushmoqda...")
-    # Veb serverni alohida oqimda yoqamiz
-    threading.Thread(target=run_server, daemon=True).start()
-    # Botni ishga tushiramiz
-    bot.infinity_polling()
+# Botni alohida oqimda orqada yuritish
+import threading
+threading.Thread(target=lambda: bot.infinity_polling(), daemon=True).start()
+
+# Asosiy sahifani ishga tushirish (Hugging Face uchun)
+demo = io.Interface(fn=greet, inputs=[], outputs="text", title="Zombie War Bot Status")
+demo.launch(server_name="0.0.0.0", server_port=7860)
